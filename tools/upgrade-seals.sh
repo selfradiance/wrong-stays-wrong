@@ -4,6 +4,11 @@
 # Usage (from the repo root):  ./tools/upgrade-seals.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
+command -v ots >/dev/null || { echo "ots not installed: brew install opentimestamps-client"; exit 1; }
+[ -z "$(git diff --cached --name-only)" ] || {
+  echo "refusing to upgrade: Git already has staged changes"
+  exit 1
+}
 changed=0
 for o in seals/*.ots; do
   [ -e "$o" ] || continue
