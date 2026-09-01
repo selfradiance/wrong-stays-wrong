@@ -139,6 +139,7 @@ else
   fail "upgrade handles an empty seals directory"
 fi
 
+repo_artifacts_before="$(find chapters seals scoring tests -maxdepth 1 -type f -print | sort)"
 ssh-keygen -q -t ed25519 -N '' -C 'temporary contract test' -f "$test_root/test_key"
 printf 'signature fixture\n' > "$test_root/signed.txt"
 ssh-keygen -Y sign -q -f "$test_root/test_key" -n wrong-stays-wrong "$test_root/signed.txt"
@@ -150,7 +151,7 @@ if ots stamp "$test_root/timestamped.txt" >/dev/null 2>&1 && test -s "$test_root
 else
   fail "temporary OpenTimestamps proof parses"
 fi
-if find chapters seals scoring tests -maxdepth 1 -type f \( -name '*fixture*' -o -name '*.sig' -o -name '*.ots' \) | grep -q .; then
+if test "$repo_artifacts_before" != "$(find chapters seals scoring tests -maxdepth 1 -type f -print | sort)"; then
   fail "temporary test artifacts stay outside the repository"
 else
   pass "temporary test artifacts stay outside the repository"
