@@ -37,22 +37,23 @@ run_failure() {
 }
 
 check "README title" test "$(sed -n '1p' README.md)" = "# Wrong Stays Wrong"
-check "brief title" test "$(sed -n '1p' contemporaneous-record-project-brief.md)" = "# Wrong Stays Wrong"
-check "settled title documented" contains 'The settled title is **Wrong Stays Wrong**' contemporaneous-record-project-brief.md
+check "project context title" test "$(sed -n '1p' wrong-stays-wrong-project-context.md)" = "# Wrong Stays Wrong"
+check "settled title documented" contains 'The settled title is **Wrong Stays Wrong**' wrong-stays-wrong-project-context.md
 check "model collaboration rule" contains 'Each chapter names the AI model that actually co-wrote it' README.md
 check "README does not assign every chapter to Claude" not_contains 'between James and Claude' README.md
-check "Claude seed provenance retained" contains 'Claude vintage at seeding:' contemporaneous-record-project-brief.md
-check "Codex handoff dated" contains 'Continuing work moved to Codex on 2026-08-31' contemporaneous-record-project-brief.md
-check "jambling defined" contains '"Jambling" is James' contemporaneous-record-project-brief.md
-check "workflow documented" contains 'jambling → distill → mark → seal' contemporaneous-record-project-brief.md
-check "header fields documented" contains '`Date`, `Chapter`, `Question`, `AI model`, and `Reasoning level`' contemporaneous-record-project-brief.md
-check "Sol default documented" contains 'Sol at the highest available reasoning level unless James explicitly chooses otherwise' contemporaneous-record-project-brief.md
+check "Claude seed provenance retained" contains 'Claude vintage at seeding:' wrong-stays-wrong-project-context.md
+check "Codex handoff dated" contains 'Continuing work moved to Codex on 2026-08-31' wrong-stays-wrong-project-context.md
+check "jambling defined" contains '“Jambling” is James' wrong-stays-wrong-project-context.md
+check "workflow documented" contains 'jambling → distill → mark → seal' wrong-stays-wrong-project-context.md
+check "header fields documented" contains '`Date`, `Chapter`, `Question`, `AI model`, and `Reasoning level`' wrong-stays-wrong-project-context.md
+check "Sol default documented" contains 'Sol at the highest available reasoning level unless James explicitly chooses otherwise' wrong-stays-wrong-project-context.md
+check "old project context filename is gone" test ! -e contemporaneous-record-project-brief.md
 
 tracked_files="$(git ls-files)"
 for placeholder in chapters/.gitkeep seals/.gitkeep scoring/.gitkeep; do
   if grep -Fxq "$placeholder" <<<"$tracked_files"; then pass "$placeholder is tracked"; else fail "$placeholder is tracked"; fi
 done
-for local_file in log.md contract.md contemporaneous-record-project-brief.md; do
+for local_file in log.md contract.md wrong-stays-wrong-project-context.md; do
   check "$local_file is ignored" git check-ignore -q "$local_file"
   if grep -Fxq "$local_file" <<<"$tracked_files"; then fail "$local_file is not tracked"; else pass "$local_file is not tracked"; fi
 done
