@@ -135,9 +135,9 @@ rm -f "$staged_fixture"
 head_before="$(git rev-parse HEAD)"
 upgrade_output="$(./tools/upgrade-seals.sh)"
 if test "$upgrade_output" = 'Nothing to upgrade yet.' && test "$head_before" = "$(git rev-parse HEAD)"; then
-  pass "upgrade handles an empty seals directory"
+  pass "upgrade handles proofs with nothing available"
 else
-  fail "upgrade handles an empty seals directory"
+  fail "upgrade handles proofs with nothing available"
 fi
 
 upgrade_test_root="$test_root/upgrade-detection"
@@ -164,6 +164,21 @@ if PATH="$upgrade_test_root/fake-bin:$PATH" TEST_GIT_LOG="$upgrade_git_log" "$up
   pass "upgrade detects proof changes without parsing calendar wording"
 else
   fail "upgrade detects proof changes without parsing calendar wording"
+fi
+
+rm -f "$upgrade_git_log"
+printf '%s\n' \
+  '#!/usr/bin/env bash' \
+  'printf "Calendar test: Pending confirmation in Bitcoin blockchain\n"' \
+  'printf "Failed! Timestamp not complete\n"' \
+  'exit 1' \
+  > "$upgrade_test_root/fake-bin/ots"
+if pending_output="$(PATH="$upgrade_test_root/fake-bin:$PATH" TEST_GIT_LOG="$upgrade_git_log" "$upgrade_test_root/repo/tools/upgrade-seals.sh")" \
+  && test "$pending_output" = 'Nothing to upgrade yet.' \
+  && test ! -s "$upgrade_git_log"; then
+  pass "upgrade treats pending Bitcoin confirmation as normal"
+else
+  fail "upgrade treats pending Bitcoin confirmation as normal"
 fi
 
 repo_artifacts_before="$(find chapters seals scoring tests -maxdepth 1 -type f -print | sort)"

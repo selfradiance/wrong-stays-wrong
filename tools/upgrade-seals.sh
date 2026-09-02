@@ -13,13 +13,21 @@ changed=0
 for o in seals/*.ots; do
   [ -e "$o" ] || continue
   proof_before="$(shasum -a 256 "$o" | awk '{print $1}')"
-  if ! ots_output="$(ots upgrade "$o" 2>&1)"; then
-    printf '%s\n' "$ots_output" >&2
-    exit 1
-  fi
+  set +e
+  ots_output="$(ots upgrade "$o" 2>&1)"
+  ots_status=$?
+  set -e
   rm -f "$o.bak"
   proof_after="$(shasum -a 256 "$o" | awk '{print $1}')"
-  if [ "$proof_before" != "$proof_after" ]; then changed=1; fi
+  if [ "$proof_before" != "$proof_after" ]; then
+    ots info "$o" >/dev/null
+    changed=1
+  elif [ "$ots_status" -ne 0 ]; then
+    case "$ots_output" in
+      *"Pending confirmation in Bitcoin blockchain"*"Timestamp not complete"*) ;;
+      *) printf '%s\n' "$ots_output" >&2; exit "$ots_status" ;;
+    esac
+  fi
 done
 if [ "$changed" = 1 ]; then
   git add seals/*.ots
