@@ -140,6 +140,32 @@ else
   fail "upgrade handles an empty seals directory"
 fi
 
+upgrade_test_root="$test_root/upgrade-detection"
+mkdir -p "$upgrade_test_root/repo/tools" "$upgrade_test_root/repo/seals" "$upgrade_test_root/fake-bin"
+cp tools/upgrade-seals.sh "$upgrade_test_root/repo/tools/upgrade-seals.sh"
+printf 'pending proof\n' > "$upgrade_test_root/repo/seals/01-test.md.ots"
+printf '%s\n' \
+  '#!/usr/bin/env bash' \
+  'printf "bitcoin attestation\n" >> "$2"' \
+  'printf "calendar response changed\n"' \
+  > "$upgrade_test_root/fake-bin/ots"
+printf '%s\n' \
+  '#!/usr/bin/env bash' \
+  'if [ "$1" = diff ]; then exit 0; fi' \
+  'printf "%s\n" "$1" >> "$TEST_GIT_LOG"' \
+  > "$upgrade_test_root/fake-bin/git"
+chmod +x "$upgrade_test_root/fake-bin/ots" "$upgrade_test_root/fake-bin/git"
+upgrade_git_log="$upgrade_test_root/git.log"
+if PATH="$upgrade_test_root/fake-bin:$PATH" TEST_GIT_LOG="$upgrade_git_log" "$upgrade_test_root/repo/tools/upgrade-seals.sh" > "$output" 2>&1 \
+  && grep -Fq 'Upgraded proofs pushed.' "$output" \
+  && grep -Fxq add "$upgrade_git_log" \
+  && grep -Fxq commit "$upgrade_git_log" \
+  && grep -Fxq push "$upgrade_git_log"; then
+  pass "upgrade detects proof changes without parsing calendar wording"
+else
+  fail "upgrade detects proof changes without parsing calendar wording"
+fi
+
 repo_artifacts_before="$(find chapters seals scoring tests -maxdepth 1 -type f -print | sort)"
 ssh-keygen -q -t ed25519 -N '' -C 'temporary contract test' -f "$test_root/test_key"
 printf 'signature fixture\n' > "$test_root/signed.txt"

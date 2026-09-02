@@ -12,8 +12,14 @@ command -v ots >/dev/null || { echo "ots not installed: brew install opentimesta
 changed=0
 for o in seals/*.ots; do
   [ -e "$o" ] || continue
-  if ots upgrade "$o" 2>&1 | grep -q Upgraded; then changed=1; fi
+  proof_before="$(shasum -a 256 "$o" | awk '{print $1}')"
+  if ! ots_output="$(ots upgrade "$o" 2>&1)"; then
+    printf '%s\n' "$ots_output" >&2
+    exit 1
+  fi
   rm -f "$o.bak"
+  proof_after="$(shasum -a 256 "$o" | awk '{print $1}')"
+  if [ "$proof_before" != "$proof_after" ]; then changed=1; fi
 done
 if [ "$changed" = 1 ]; then
   git add seals/*.ots
