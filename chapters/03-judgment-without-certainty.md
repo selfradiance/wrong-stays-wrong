@@ -6,7 +6,7 @@ Reasoning level: Ultra for jambling; High for distillation
 
 # Judgment Without Certainty
 
-*Draft for review — unmarked and unsealed. This is a record of personal experience and open questions; no scoreable predictions have been selected.*
+*Unscored reflection. This chapter records personal experience and open questions; it makes no predictions for later scoring.*
 
 I began with a question about judging AI's work. Before long I was questioning judgment itself. By the end I could hardly remember what the book was about. I was laughing. I wanted to have my coffee and enjoy the day.
 
