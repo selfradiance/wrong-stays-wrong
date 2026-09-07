@@ -1,8 +1,8 @@
 Date: 2026-09-07<br>
 Chapter: 5<br>
 Question: What can several imperfect AIs discover together that none could find alone?<br>
-AI model: Codex (configured model identifier to be confirmed before sealing)<br>
-Reasoning level: To be confirmed before sealing
+AI model: gpt-5.6-sol (configured identifier)<br>
+Reasoning level: Medium
 
 # The Body Was the Test
 
